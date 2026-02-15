@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GMAT Focus Coach</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>GMAT Focus Coach</h1>
+      <p>
+        Adaptive practice that targets weak spots across Quantitative Reasoning,
+        Verbal Reasoning, and Data Insights.
+      </p>
+    </header>
+
+    <main>
+      <section class="panel" id="next-question-panel">
+        <div class="panel-header">
+          <h2>Next Strategic Question</h2>
+          <button id="next-question-btn" class="secondary">Get New Question</button>
+        </div>
+        <div id="question-card" class="question-card"></div>
+      </section>
+
+      <section class="panel answer-panel">
+        <h2>Answer Submission</h2>
+        <div class="btn-row">
+          <button id="submit-answer-btn" class="success">Submit Selected Answer</button>
+        </div>
+        <p id="feedback" class="feedback"></p>
+        <div id="solution" class="solution"></div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-header">
+          <h2>Competency Dashboard (1-100)</h2>
+          <button id="reset-btn" class="danger secondary">Reset Progress</button>
+        </div>
+        <div id="dashboard" class="dashboard-grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Predicted Performance</h2>
+        <div id="predictions" class="predictions-grid"></div>
+      </section>
+
+      <section class="panel">
+        <h2>Study Strategy Suggestions</h2>
+        <ul id="suggestions" class="suggestions"></ul>
+      </section>
+    </main>
+
+    <template id="metric-template">
+      <article class="metric-card">
+        <h3></h3>
+        <div class="meter"><span></span></div>
+        <p class="score"></p>
+      </article>
+    </template>
+
+    <script src="app.js"></script>
+  </body>
+</html>
