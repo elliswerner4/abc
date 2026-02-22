@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+config/.env
+server.log
+*.xlsx
+*.docx
+static/downloads/
+.DS_Store
+node_modules/

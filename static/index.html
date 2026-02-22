@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prologis Racking Design Engine</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- ═══ Header ═══ -->
+  <header class="header">
+    <div class="header-inner">
+      <div class="header-left">
+        <img src="/assets/prologis-logo.png" alt="Prologis" class="logo" onerror="this.style.display='none'">
+        <div class="header-divider"></div>
+        <div class="header-title">
+          <h1>Racking Design Engine</h1>
+        </div>
+      </div>
+      <div class="header-right">
+        <div class="deal-selector" id="dealSelector">
+          <button class="btn-ghost" id="dealMenuBtn" onclick="toggleDealMenu()">
+            <span class="material-icons-outlined">folder_open</span>
+            <span id="currentDealName">New Deal</span>
+            <span class="material-icons-outlined" style="font-size:18px">expand_more</span>
+          </button>
+          <div class="deal-dropdown" id="dealDropdown">
+            <div class="deal-dropdown-header">
+              <span>Saved Deals</span>
+              <button class="btn-sm btn-accent" onclick="newDeal()">+ New</button>
+            </div>
+            <div id="dealList" class="deal-list"></div>
+          </div>
+        </div>
+        <button class="btn-icon" title="Save Deal" onclick="saveDeal()">
+          <span class="material-icons-outlined">save</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ═══ App Layout: Sidebar + Content ═══ -->
+  <div class="app-layout">
+
+  <!-- ═══ Sidebar Step Nav ═══ -->
+  <nav class="step-nav" id="stepNav">
+    <div class="step-nav-inner">
+      <button class="step-tab active" data-step="0" onclick="goToStep(0)">
+        <div class="step-icon"><span class="material-icons-outlined">apartment</span></div>
+        <div class="step-label">Building Info</div>
+        <div class="step-check" id="check-0"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+      <button class="step-tab" data-step="1" onclick="goToStep(1)">
+        <div class="step-icon"><span class="material-icons-outlined">grid_view</span></div>
+        <div class="step-label">Layout Design</div>
+        <div class="step-check" id="check-1"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+      <button class="step-tab" data-step="2" onclick="goToStep(2)">
+        <div class="step-icon"><span class="material-icons-outlined">list_alt</span></div>
+        <div class="step-label">BOM</div>
+        <div class="step-check" id="check-2"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+      <button class="step-tab" data-step="3" onclick="goToStep(3)">
+        <div class="step-icon"><span class="material-icons-outlined">attach_money</span></div>
+        <div class="step-label">Pricing</div>
+        <div class="step-check" id="check-3"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+      <button class="step-tab" data-step="4" onclick="goToStep(4)">
+        <div class="step-icon"><span class="material-icons-outlined">description</span></div>
+        <div class="step-label">Proposal</div>
+        <div class="step-check" id="check-4"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+      <button class="step-tab" data-step="5" onclick="goToStep(5)">
+        <div class="step-icon"><span class="material-icons-outlined">gavel</span></div>
+        <div class="step-label">Contract</div>
+        <div class="step-check" id="check-5"><span class="material-icons-outlined">check_circle</span></div>
+      </button>
+    </div>
+  </nav>
+
+  <!-- ═══ Main Content ═══ -->
+  <main class="main" id="mainContent">
+
+    <!-- ── Stage 0: Building Info ── -->
+    <section class="stage" id="stage-0">
+      <div class="stage-header">
+        <h2>Building Information</h2>
+        <p class="stage-desc">Enter warehouse details and location for seismic and fire code assessment.</p>
+      </div>
+
+      <div class="card-grid">
+        <!-- Project Details -->
+        <div class="card">
+          <div class="card-title">
+            <span class="material-icons-outlined">business</span>
+            Project Details
+          </div>
+          <div class="form-group">
+            <label for="projectName">Project / Deal Name</label>
+            <input type="text" id="projectName" placeholder="e.g. Spirit Halloween — Perris, CA" onchange="onBuildingChange()">
+          </div>
+          <div class="form-group">
+            <label for="clientName">Client</label>
+            <input type="text" id="clientName" placeholder="e.g. Spirit Halloween" onchange="onBuildingChange()">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="prologisMarket">Prologis Market</label>
+              <select id="prologisMarket" onchange="onMarketChange()">
+                <option value="">— Select Market —</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- Location & Seismic -->
+        <div class="card">
+          <div class="card-title">
+            <span class="material-icons-outlined">location_on</span>
+            Location &amp; Seismic
+          </div>
+          <div class="form-group">
+            <label for="address">Building Address</label>
+            <div class="input-with-btn">
+              <input type="text" id="address" placeholder="e.g. 18901 Krameria Ave, Riverside, CA 92508" onchange="onBuildingChange()">
+              <button class="btn-sm btn-accent" onclick="lookupSeismic()" id="seismicBtn">
+                <span class="material-icons-outlined">search</span> Lookup
+              </button>
+            </div>
+          </div>
+          <div id="seismicResult" class="info-panel hidden">
+            <div class="info-panel-title">
+              <span class="material-icons-outlined">shield</span>
+              Seismic Design Category
+            </div>
+            <div id="seismicContent"></div>
+          </div>
+        </div>
+
+        <!-- Building Specs -->
+        <div class="card">
+          <div class="card-title">
+            <span class="material-icons-outlined">straighten</span>
+            Building Dimensions
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="buildingLength">Length (ft) <span class="hint">dock to back wall</span></label>
+              <input type="number" id="buildingLength" value="600" min="100" max="2000" onchange="onBuildingChange()">
+            </div>
+            <div class="form-group">
+              <label for="buildingWidth">Width (ft) <span class="hint">side to side</span></label>
+              <input type="number" id="buildingWidth" value="300" min="50" max="1000" onchange="onBuildingChange()">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="clearHeight">Clear Height (ft)</label>
+              <input type="number" id="clearHeight" value="32" min="12" max="60" onchange="onBuildingChange()">
+            </div>
+            <div class="form-group">
+              <label for="numDocks">Dock Doors</label>
+              <input type="number" id="numDocks" value="15" min="1" max="200" onchange="onBuildingChange()">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="dockSide">Dock Side</label>
+              <select id="dockSide" onchange="onBuildingChange()">
+                <option value="south" selected>South</option>
+                <option value="north">North</option>
+                <option value="east">East</option>
+                <option value="west">West</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="columnGrid">Column Grid (ft)</label>
+              <div class="form-row compact">
+                <input type="number" id="columnGridX" value="50" min="0" max="100" placeholder="X" onchange="onBuildingChange()">
+                <span class="form-sep">×</span>
+                <input type="number" id="columnGridY" value="50" min="0" max="100" placeholder="Y" onchange="onBuildingChange()">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Floor Plan Upload -->
+        <div class="card">
+          <div class="card-title">
+            <span class="material-icons-outlined">upload_file</span>
+            Floor Plan (Optional)
+          </div>
+          <div class="upload-area" id="uploadArea" onclick="document.getElementById('floorPlanFile').click()">
+            <span class="material-icons-outlined upload-icon">cloud_upload</span>
+            <p>Drop floor plan PDF/DWG here or <strong>click to browse</strong></p>
+            <p class="hint">Supports PDF, DWG, DXF, PNG, JPG</p>
+            <input type="file" id="floorPlanFile" accept=".pdf,.dwg,.dxf,.png,.jpg,.jpeg" hidden onchange="onFloorPlanUpload(event)">
+          </div>
+          <div id="uploadedFile" class="uploaded-file hidden"></div>
+        </div>
+      </div>
+
+      <!-- Fire Assessment Panel -->
+      <div id="fireAssessment" class="card fire-card hidden">
+        <div class="card-title">
+          <span class="material-icons-outlined">local_fire_department</span>
+          Fire Code Assessment
+        </div>
+        <div id="fireContent"></div>
+      </div>
+
+      <div class="stage-actions">
+        <div></div>
+        <button class="btn btn-primary" onclick="goToStep(1)">
+          Continue to Layout Design
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Stage 1: Layout Design ── -->
+    <section class="stage" id="stage-1">
+      <div class="stage-header">
+        <h2>Layout Design</h2>
+        <p class="stage-desc">Configure rack layout parameters and preview the warehouse floor plan.</p>
+      </div>
+
+      <div class="layout-grid">
+        <!-- Config Panel -->
+        <div class="layout-config">
+          <div class="card">
+            <div class="card-title">
+              <span class="material-icons-outlined">tune</span>
+              Rack Configuration
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="rackStyle">Rack Style</label>
+                <select id="rackStyle" onchange="onLayoutChange()">
+                  <option value="teardrop" selected>Teardrop</option>
+                  <option value="structural">Structural</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="rackType">Rack Type</label>
+                <select id="rackType" onchange="onLayoutChange()">
+                  <option value="selective" selected>Selective</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="frameDepth">Frame Depth (in)</label>
+                <select id="frameDepth" onchange="onLayoutChange()">
+                  <option value="36">36"</option>
+                  <option value="42" selected>42"</option>
+                  <option value="48">48"</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="forkliftType">Forklift Type</label>
+                <select id="forkliftType" onchange="onLayoutChange()">
+                  <option value="sitdown">Sit-Down (12ft aisle)</option>
+                  <option value="reach" selected>Reach Truck (10ft)</option>
+                  <option value="narrow_aisle">Narrow Aisle (6ft)</option>
+                  <option value="vna">VNA (5.5ft)</option>
+                </select>
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="palletSize">Pallet Size</label>
+                <select id="palletSize" onchange="onLayoutChange()">
+                  <option value="48x40" selected>48 × 40</option>
+                  <option value="48x48">48 × 48</option>
+                  <option value="42x42">42 × 42</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="stagingDepth">Staging Depth (ft)</label>
+                <input type="number" id="stagingDepth" value="50" min="20" max="150" onchange="onLayoutChange()">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="newOrUsed">New or Used</label>
+                <select id="newOrUsed" onchange="onLayoutChange()">
+                  <option value="new" selected>New</option>
+                  <option value="used">Used</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="targetPP">Target Pallet Positions <span class="hint">0 = maximize</span></label>
+                <input type="number" id="targetPP" value="0" min="0" onchange="onLayoutChange()">
+              </div>
+            </div>
+          </div>
+
+          <button class="btn btn-primary btn-block" onclick="generateLayout()" id="generateLayoutBtn">
+            <span class="material-icons-outlined">auto_fix_high</span>
+            Generate Layout
+          </button>
+
+          <!-- Layout Summary Card -->
+          <div class="card layout-summary hidden" id="layoutSummary">
+            <div class="card-title">
+              <span class="material-icons-outlined">analytics</span>
+              Layout Summary
+            </div>
+            <div id="layoutSummaryContent"></div>
+          </div>
+        </div>
+
+        <!-- SVG Preview -->
+        <div class="layout-preview">
+          <div class="card svg-card">
+            <div class="card-title">
+              <span class="material-icons-outlined">map</span>
+              Floor Plan Preview
+            </div>
+            <div id="svgContainer" class="svg-container">
+              <div class="svg-placeholder">
+                <span class="material-icons-outlined">view_in_ar</span>
+                <p>Configure parameters and click <strong>Generate Layout</strong> to preview the floor plan</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn btn-secondary" onclick="goToStep(0)">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="goToStep(2)">
+          Continue to BOM
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Stage 2: BOM ── -->
+    <section class="stage" id="stage-2">
+      <div class="stage-header">
+        <h2>Bill of Materials</h2>
+        <p class="stage-desc">Review the parts list generated from your layout design.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title-row">
+          <div class="card-title">
+            <span class="material-icons-outlined">inventory_2</span>
+            BOM Items
+          </div>
+          <button class="btn-sm btn-accent" onclick="recalculateBOM()" id="recalcBomBtn">
+            <span class="material-icons-outlined">refresh</span> Recalculate
+          </button>
+        </div>
+        <div id="bomContent">
+          <div class="empty-state">
+            <span class="material-icons-outlined">inventory_2</span>
+            <p>Generate a layout first, then the BOM will auto-populate.</p>
+            <button class="btn btn-secondary" onclick="goToStep(1)">Go to Layout Design</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- BOM Summary Card -->
+      <div class="card hidden" id="bomSummaryCard">
+        <div class="card-title">
+          <span class="material-icons-outlined">summarize</span>
+          BOM Summary
+        </div>
+        <div id="bomSummaryContent"></div>
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn btn-secondary" onclick="goToStep(1)">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="goToStep(3)">
+          Continue to Pricing
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Stage 3: Pricing Model ── -->
+    <section class="stage" id="stage-3">
+      <div class="stage-header">
+        <h2>Pricing Model</h2>
+        <p class="stage-desc">Download the pricing workbook with BOM data pre-filled.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <span class="material-icons-outlined">table_chart</span>
+          Pricing Workbook
+        </div>
+        <div class="pricing-export">
+          <div class="pricing-info">
+            <span class="material-icons-outlined pricing-info-icon">info</span>
+            <div>
+              <p><strong>Excel Pricing Model</strong></p>
+              <p class="hint">Downloads a pre-formatted XLSX file with BOM line items, quantity columns, and pricing formula templates. Fill in unit costs to complete pricing.</p>
+            </div>
+          </div>
+          <div id="pricingPreview" class="pricing-preview hidden"></div>
+          <button class="btn btn-primary" onclick="downloadXLSX()" id="downloadXlsxBtn">
+            <span class="material-icons-outlined">download</span>
+            Download Pricing Model (.xlsx)
+          </button>
+        </div>
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn btn-secondary" onclick="goToStep(2)">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="goToStep(4)">
+          Continue to Proposal
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Stage 4: Proposal ── -->
+    <section class="stage" id="stage-4">
+      <div class="stage-header">
+        <h2>Proposal</h2>
+        <p class="stage-desc">Generate a professional proposal document for the client.</p>
+      </div>
+
+      <div class="card placeholder-card">
+        <div class="placeholder-content">
+          <span class="material-icons-outlined placeholder-icon">description</span>
+          <h3>Template Integration Coming Soon</h3>
+          <p>This stage will auto-generate a branded Prologis proposal document with:</p>
+          <ul>
+            <li>Project summary and specifications</li>
+            <li>Layout visualization</li>
+            <li>BOM and pricing breakdown</li>
+            <li>Terms and conditions</li>
+          </ul>
+          <div class="placeholder-badge">
+            <span class="material-icons-outlined">engineering</span>
+            In Development
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn btn-secondary" onclick="goToStep(3)">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="btn btn-primary" onclick="goToStep(5)">
+          Continue to Contract
+          <span class="material-icons-outlined">arrow_forward</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- ── Stage 5: Contract ── -->
+    <section class="stage" id="stage-5">
+      <div class="stage-header">
+        <h2>Contract</h2>
+        <p class="stage-desc">Finalize the contract and agreement documents.</p>
+      </div>
+
+      <div class="card placeholder-card">
+        <div class="placeholder-content">
+          <span class="material-icons-outlined placeholder-icon">gavel</span>
+          <h3>Template Integration Coming Soon</h3>
+          <p>This stage will provide contract generation with:</p>
+          <ul>
+            <li>Pre-filled contract templates</li>
+            <li>Digital signature workflow</li>
+            <li>Document tracking and versioning</li>
+            <li>Integration with legal review process</li>
+          </ul>
+          <div class="placeholder-badge">
+            <span class="material-icons-outlined">engineering</span>
+            In Development
+          </div>
+        </div>
+      </div>
+
+      <div class="stage-actions">
+        <button class="btn btn-secondary" onclick="goToStep(4)">
+          <span class="material-icons-outlined">arrow_back</span>
+          Back
+        </button>
+        <button class="btn btn-primary" disabled>
+          <span class="material-icons-outlined">check</span>
+          Complete Deal
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  </div> <!-- /app-layout -->
+
+  <!-- Toast Notifications -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Loading Overlay -->
+  <div id="loadingOverlay" class="loading-overlay hidden">
+    <div class="loading-spinner">
+      <div class="spinner"></div>
+      <p id="loadingText">Working...</p>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
