@@ -1,0 +1,8 @@
+fastapi
+uvicorn
+python-multipart
+openpyxl
+pdf2image
+Pillow
+httpx
+python-dotenv
