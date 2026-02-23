@@ -5,6 +5,13 @@
 
   let currentStep = 0;
   const totalSteps = 6;
+  const DEFAULT_API_BASE_URL = 'https://contractors-consequence-itself-fever.trycloudflare.com'; // most recent backend
+  const API_BASE_URL = (window.__API_BASE_URL__ || DEFAULT_API_BASE_URL).replace(/\/$/, '');
+
+  function apiUrl(path) {
+    return API_BASE_URL + path;
+  }
+
 
   // ═══ Wizard Navigation ═══
   window.goToStep = function(step) {
@@ -39,6 +46,16 @@
   // Initialize on load
   document.addEventListener('DOMContentLoaded', () => {
     goToStep(0);
+    const badge = document.getElementById('apiEndpointBadge');
+    if (badge) {
+      badge.textContent = API_BASE_URL;
+      badge.href = API_BASE_URL;
+    }
+
+    const mostRecentVersionLink = document.getElementById('mostRecentVersionLink');
+    if (mostRecentVersionLink) {
+      mostRecentVersionLink.href = API_BASE_URL;
+    }
   });
 
   // ═══ Deal Save/Load ═══
@@ -118,7 +135,7 @@
     btn.disabled = true;
     btn.innerHTML = '<span class="material-icons-outlined" style="animation:spin 0.7s linear infinite">refresh</span> Looking up...';
     try {
-      const resp = await fetch('/api/seismic?address=' + encodeURIComponent(addr));
+      const resp = await fetch(apiUrl('/api/seismic?address=') + encodeURIComponent(addr));
       const json = await resp.json();
       if (json.status === 'ok' && json.data) {
         const d = json.data;
@@ -168,7 +185,7 @@
         new_or_used: document.getElementById('newOrUsed')?.value || 'new',
       };
       const addr = document.getElementById('address')?.value || '';
-      const resp = await fetch('/api/design', {
+      const resp = await fetch(apiUrl('/api/design'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -218,7 +235,7 @@
     const btn = document.getElementById('downloadXlsxBtn');
     btn.disabled = true;
     try {
-      const resp = await fetch('/api/generate-xlsx', {
+      const resp = await fetch(apiUrl('/api/generate-xlsx'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
